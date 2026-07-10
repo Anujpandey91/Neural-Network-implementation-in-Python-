@@ -53,3 +53,78 @@ def tanh(Z):
     exp_p = np.exp(Z)
     exp_n = np.exp(-Z)
     return (exp_p - exp_n) / (exp_p + exp_n)
+
+
+def sigmoid_backward(dA, cache):
+    """
+    Backward propagation for the sigmoid activation.
+
+    Parameters
+    ----------
+    dA : np.ndarray
+        Gradient of the loss with respect to the activation output.
+
+    cache : np.ndarray
+        Cached pre-activation values (Z) from the forward pass.
+
+    Returns
+    -------
+    np.ndarray
+        Gradient of the loss with respect to Z.
+    """
+    
+    Z = cache
+    A = sigmoid(Z)
+    dZ = dA * A * (1-A)
+    
+    return dZ
+
+
+def relu_backward(dA, cache):  
+    """
+    Backward propagation for the ReLU activation.
+
+    Parameters
+    ----------
+    dA : np.ndarray
+        Gradient of the loss with respect to the activation output.
+
+    cache : np.ndarray
+        Cached pre-activation values (Z) from the forward pass.
+
+    Returns
+    -------
+    np.ndarray
+        Gradient of the loss with respect to Z.
+    """
+    
+    Z = cache
+    dZ = dA.copy()
+    dZ[Z <= 0 ] = 0
+    
+    return dZ
+
+
+def tanh_backward(dA, cache):
+    """
+    Backward propagation for the tanh activation.
+
+    Parameters
+    ----------
+    dA : np.ndarray
+        Gradient of the loss with respect to the activation output.
+
+    cache : np.ndarray
+        Cached pre-activation values (Z) from the forward pass.
+
+    Returns
+    -------
+    np.ndarray
+        Gradient of the loss with respect to Z.
+    """
+    
+    Z = cache
+    A = tanh(Z)
+    dZ = dA * (1-A**2)
+    
+    return dZ
