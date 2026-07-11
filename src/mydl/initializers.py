@@ -7,7 +7,7 @@ def ones(shape):
     return np.ones(shape)
 
 def random(shape, scale):
-    return np.random.randn(shape) * scale
+    return np.random.randn(*shape) * scale
 
 
 def xavier(shape):
