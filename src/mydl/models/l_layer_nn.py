@@ -32,7 +32,7 @@ class LLayerNN:
         for l in range(1, len(self.layer_dims)):
             self.parameters["W" + str(l)] = random(
                 (self.layer_dims[l], self.layer_dims[l - 1]),
-                np.sqrt(2 / self.layer_dims[l - 1]),
+                np.sqrt(2. / self.layer_dims[l - 1]),
             )
             self.parameters["b"+ str(l)] = zeros((self.layer_dims[l],1))
 
