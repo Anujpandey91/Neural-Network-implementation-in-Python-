@@ -4,6 +4,7 @@ pyproject.toml
 src/mydl/__init__.py
 src/mydl/activations.py
 src/mydl/initializers.py
+src/mydl/layers.py
 src/mydl/losses.py
 src/mydl/metrics.py
 src/mydl/utils.py
@@ -25,5 +26,11 @@ src/mydl/optimizers/rmsprop.py
 src/mydl/visualization/__init__.py
 src/mydl/visualization/plots.py
 tests/test_activations.py
+tests/test_gradient_check.py
+tests/test_initializers.py
+tests/test_l_layer_nn.py
+tests/test_layers.py
 tests/test_logistic.py
 tests/test_losses.py
+tests/test_metrics.py
+tests/test_two_layer_nn.py
