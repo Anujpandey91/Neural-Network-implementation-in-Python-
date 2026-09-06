@@ -94,30 +94,76 @@ class LLayerNN:
             self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - self.learning_rate * self.grads["dW" + str(l)]
             self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - self.learning_rate * self.grads["db" + str(l)]
 
-    def fit(self, X:np.ndarray, Y: np.ndarray):
-        n_features,m = X.shape
+    def fit(self, X, Y, batch_size=...):
 
+        # 1. Get dimensions
+        n_features, m = X.shape
+
+        # 2. Validate batch_size
+        if not isinstance(batch_size, int):
+            raise TypeError("batch_size must be an integer")
+
+        if batch_size <= 0:
+            raise ValueError("batch_size must be greater than zero")
+
+        batch_size = min(batch_size, m)
+
+        # 3. Set up layer dimensions
         self.layer_dims = [
             n_features,
             *self.hidden_layer,
             1
         ]
+
+        # 4. Initialize parameters
         self._initialize_parameters()
 
+        # 5. Training
         for epoch in range(self.epochs):
-            # forward propagation
-            prediction , caches = self._forward(X)
-            # compute loss
-            cost = self._compute_loss(Y,prediction)
-            # backward propagation
-            self._backward(Y, prediction, caches)
-            # gradient descent
-            self._update_parameters()
-            # save cost
+
+            # 5a. Shuffle the dataset
+            permutation = np.random.permutation(m)
+
+            X_shuffled = X[:, permutation]
+            Y_shuffled = Y[:, permutation]
+
+            # 5b. Track total cost for this epoch
+            epoch_cost = 0
+            num_batches = 0 
+
+            # 5c. Go through mini-batches
+            for start in range(0, m, batch_size):
+
+                # determine end
+                end = start + batch_size
+                # get X_batch
+                X_batch = X_shuffled[:, start:end]
+                # get Y_batch
+                Y_batch = Y_shuffled[:, start:end]
+
+                # forward
+                prediction, caches = self._forward(X_batch)
+
+                # loss
+                batch_cost = self._compute_loss(Y_batch, prediction)
+
+                # backward
+                self._backward(Y_batch, prediction, caches)
+
+                # update
+                self._update_parameters()
+
+                # accumulate cost
+                epoch_cost += batch_cost
+                num_batches += 1
+
+            # 5d. Calculate epoch cost
+            cost = epoch_cost / num_batches
+
+            # 5e. Store epoch cost
             self.cost_history.append(cost)
 
-            if self.verbose and epoch % 100 == 0:
-                print(f"Epoch {epoch:4d} | Cost: {cost:.6f}")    
+            # 5f. Print
 
         self.is_fitted = True
 
