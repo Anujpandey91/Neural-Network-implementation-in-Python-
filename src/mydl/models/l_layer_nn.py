@@ -94,19 +94,20 @@ class LLayerNN:
             self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - self.learning_rate * self.grads["dW" + str(l)]
             self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - self.learning_rate * self.grads["db" + str(l)]
 
-    def fit(self, X, Y, batch_size=...):
+    def fit(self, X, Y, batch_size=None):
 
         # 1. Get dimensions
         n_features, m = X.shape
 
         # 2. Validate batch_size
-        if not isinstance(batch_size, int):
-            raise TypeError("batch_size must be an integer")
-
-        if batch_size <= 0:
-            raise ValueError("batch_size must be greater than zero")
-
-        batch_size = min(batch_size, m)
+        if batch_size is None:
+            batch_size = m
+        elif not isinstance(batch_size, int):
+            raise TypeError(...)
+        elif batch_size <= 0:
+            raise ValueError(...)
+        else:
+            batch_size = min(batch_size, m)
 
         # 3. Set up layer dimensions
         self.layer_dims = [
