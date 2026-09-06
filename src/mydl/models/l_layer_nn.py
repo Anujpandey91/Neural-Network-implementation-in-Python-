@@ -32,7 +32,7 @@ class LLayerNN:
         for l in range(1, len(self.layer_dims)):
             self.parameters["W" + str(l)] = random(
                 (self.layer_dims[l], self.layer_dims[l - 1]),
-                np.sqrt(2 / self.layer_dims[l - 1]),
+                np.sqrt(2. / self.layer_dims[l - 1]),
             )
             self.parameters["b" + str(l)] = zeros((self.layer_dims[l], 1))
 
@@ -95,32 +95,76 @@ class LLayerNN:
                 - self.learning_rate * self.grads["db" + str(l)]
             )
 
-    def fit(self, X: np.ndarray, Y: np.ndarray):
+    def fit(self, X: np.ndarray, Y: np.ndarray, batch_size=None):
+
+        # 1. Get dimensions
         n_features, m = X.shape
 
+        # 2. Validate batch_size
+        if batch_size is None:
+            batch_size = m
+        elif not isinstance(batch_size, int):
+            raise TypeError("batch_size must be an integer")
+        elif batch_size <= 0:
+            raise ValueError("batch_size must be a positive integer")
+        else:
+            batch_size = min(batch_size, m)
+
+        # 3. Set up layer dimensions
         self.layer_dims = [
             n_features,
             *self.hidden_layer,
             1,
         ]
+
+        # 4. Initialize parameters
         self._initialize_parameters()
 
+        # 5. Training
         for epoch in range(self.epochs):
-            # Forward propagation
-            prediction, caches = self._forward(X)
+            # 5a. Shuffle the dataset
+            permutation = np.random.permutation(m)
 
-            # Compute loss
-            cost = self._compute_loss(Y, prediction)
+            X_shuffled = X[:, permutation]
+            Y_shuffled = Y[:, permutation]
 
-            # Backward propagation
-            self._backward(Y, prediction, caches)
+            # 5b. Track total cost for this epoch
+            epoch_cost = 0
+            num_batches = 0
 
-            # Gradient descent
-            self._update_parameters()
+            # 5c. Go through mini-batches
+            for start in range(0, m, batch_size):
 
-            # Save cost
+                # determine end
+                end = start + batch_size
+                # get X_batch
+                X_batch = X_shuffled[:, start:end]
+                # get Y_batch
+                Y_batch = Y_shuffled[:, start:end]
+
+                # forward
+                prediction, caches = self._forward(X_batch)
+
+                # loss
+                batch_cost = self._compute_loss(Y_batch, prediction)
+
+                # backward
+                self._backward(Y_batch, prediction, caches)
+
+                # update
+                self._update_parameters()
+
+                # accumulate cost
+                epoch_cost += batch_cost
+                num_batches += 1
+
+            # 5d. Calculate epoch cost
+            cost = epoch_cost / num_batches
+
+            # 5e. Store epoch cost
             self.cost_history.append(cost)
 
+            # 5f. Print
             if self.verbose and epoch % 100 == 0:
                 print(f"Epoch {epoch:4d} | Cost: {cost:.6f}")
 

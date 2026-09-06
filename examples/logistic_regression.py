@@ -125,7 +125,6 @@ def plot_learning_curve(model):
 
     plt.ylabel("Binary Cross Entropy Loss")
 
-    plt.grid(True)
 
     plt.tight_layout()
 
