@@ -5,21 +5,20 @@ from ..layers import linear_activation_backward, linear_activation_forward
 from ..activations import relu, sigmoid, sigmoid_backward, relu_backward
 from ..losses import binary_cross_entropy, binary_cross_entropy_backward
 
-
 class LLayerNN:
 
     def __init__(
         self,
         hidden_layer: list[int],
-        learning_rate: float = 0.01,
-        epochs: int = 100,
-        threshold: float = 0.5,
-        verbose=True,
+        optimizer,
+        epochs: int=100,
+        threshold: float=0.5,
+        verbose = True
     ):
         self.hidden_layer = hidden_layer
-        self.learning_rate = learning_rate
         self.epochs = epochs
         self.threshold = threshold
+        self.optimizer = optimizer
 
         self.cost_history = []
         self.is_fitted = False
@@ -56,6 +55,8 @@ class LLayerNN:
 
         return AL, caches
 
+        ...
+
     def _compute_loss(self, Y, A):
         return binary_cross_entropy(Y, A)
 
@@ -83,17 +84,12 @@ class LLayerNN:
             self.grads["db" + str(l)] = dbl
 
     def _update_parameters(self):
+
         L = len(self.parameters) // 2
 
-        for l in range(1, L + 1):
-            self.parameters["W" + str(l)] = (
-                self.parameters["W" + str(l)]
-                - self.learning_rate * self.grads["dW" + str(l)]
-            )
-            self.parameters["b" + str(l)] = (
-                self.parameters["b" + str(l)]
-                - self.learning_rate * self.grads["db" + str(l)]
-            )
+        for l in range(1,L+1):
+            self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - self.learning_rate * self.grads["dW" + str(l)]
+            self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - self.learning_rate * self.grads["db" + str(l)]
 
     def fit(self, X: np.ndarray, Y: np.ndarray, batch_size=None):
 
@@ -108,7 +104,7 @@ class LLayerNN:
         elif batch_size <= 0:
             raise ValueError("batch_size must be a positive integer")
         else:
-            batch_size = min(batch_size, m)
+            batch_size = min(batch_size, m)                                   
 
         # 3. Set up layer dimensions
         self.layer_dims = [
