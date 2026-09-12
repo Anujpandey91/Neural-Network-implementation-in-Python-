@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 
 from mydl.models import LLayerNN
 from mydl.optimizers import Momentum
+from mydl.optimizers import RMSProp
 
 def load_dataset():
     data = load_breast_cancer()
@@ -55,7 +56,7 @@ class TestLLayerNN:
     def test_cost_decreases(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            optimizer = Momentum(learning_rate=0.01),
+            optimizer = RMSProp(learning_rate=0.01),
             epochs=100,
             verbose=False,
         )
