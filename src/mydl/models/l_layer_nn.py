@@ -4,6 +4,8 @@ from ..initializers import random, zeros
 from ..layers import linear_activation_backward, linear_activation_forward
 from ..activations import relu, sigmoid, sigmoid_backward, relu_backward
 from ..losses import binary_cross_entropy, binary_cross_entropy_backward
+from ..regularizers import L2
+
 
 class LLayerNN:
 
@@ -11,14 +13,16 @@ class LLayerNN:
         self,
         hidden_layer: list[int],
         optimizer,
-        epochs: int=100,
-        threshold: float=0.5,
-        verbose = True
+        regularizer=None,
+        epochs: int = 100,
+        threshold: float = 0.5,
+        verbose=True,
     ):
         self.hidden_layer = hidden_layer
         self.epochs = epochs
         self.threshold = threshold
         self.optimizer = optimizer
+        self.regularizer = regularizer
 
         self.cost_history = []
         self.is_fitted = False
@@ -31,7 +35,7 @@ class LLayerNN:
         for l in range(1, len(self.layer_dims)):
             self.parameters["W" + str(l)] = random(
                 (self.layer_dims[l], self.layer_dims[l - 1]),
-                np.sqrt(2. / self.layer_dims[l - 1]),
+                np.sqrt(2.0 / self.layer_dims[l - 1]),
             )
             self.parameters["b" + str(l)] = zeros((self.layer_dims[l], 1))
 
@@ -55,12 +59,17 @@ class LLayerNN:
 
         return AL, caches
 
-        ...
+    def _compute_loss(self, Y, A, m):
 
-    def _compute_loss(self, Y, A):
-        return binary_cross_entropy(Y, A)
+        data_loss = binary_cross_entropy(Y, A)
 
-    def _backward(self, Y, A, caches):
+        if self.regularizer is None:
+            return data_loss
+
+        regularization_loss = self.regularizer.penalty(self.parameters, m)
+        return data_loss + regularization_loss
+
+    def _backward(self, Y, A, caches, m):
         L = int(len(self.parameters) / 2)
 
         dAL = binary_cross_entropy_backward(Y, A)
@@ -71,6 +80,9 @@ class LLayerNN:
             sigmoid_backward,
         )
 
+        if self.regularizer is not None:
+            dWL = dWL + self.regularizer.gradient(self.parameters["W" + str(L)], m)
+
         self.grads["dW" + str(L)] = dWL
         self.grads["db" + str(L)] = dbL
 
@@ -80,16 +92,15 @@ class LLayerNN:
                 caches[l - 1],
                 relu_backward,
             )
+
+            if self.regularizer is not None:
+                dWl = dWl + self.regularizer.gradient(self.parameters["W" + str(l)], m)
+
             self.grads["dW" + str(l)] = dWl
             self.grads["db" + str(l)] = dbl
 
     def _update_parameters(self):
-
-        L = len(self.parameters) // 2
-
-        for l in range(1,L+1):
-            self.parameters["W" + str(l)] = self.parameters["W" + str(l)] - self.learning_rate * self.grads["dW" + str(l)]
-            self.parameters["b" + str(l)] = self.parameters["b" + str(l)] - self.learning_rate * self.grads["db" + str(l)]
+        self.optimizer.update(self.parameters, self.grads)
 
     def fit(self, X: np.ndarray, Y: np.ndarray, batch_size=None):
 
@@ -104,7 +115,7 @@ class LLayerNN:
         elif batch_size <= 0:
             raise ValueError("batch_size must be a positive integer")
         else:
-            batch_size = min(batch_size, m)                                   
+            batch_size = min(batch_size, m)
 
         # 3. Set up layer dimensions
         self.layer_dims = [
@@ -142,10 +153,10 @@ class LLayerNN:
                 prediction, caches = self._forward(X_batch)
 
                 # loss
-                batch_cost = self._compute_loss(Y_batch, prediction)
+                batch_cost = self._compute_loss(Y_batch, prediction, m)
 
                 # backward
-                self._backward(Y_batch, prediction, caches)
+                self._backward(Y_batch, prediction, caches, m)
 
                 # update
                 self._update_parameters()
