@@ -286,4 +286,3 @@ If you notice an issue or have an idea for improving the project, feel free to o
 
 # License
 
-This project is licensed under the MIT License.
