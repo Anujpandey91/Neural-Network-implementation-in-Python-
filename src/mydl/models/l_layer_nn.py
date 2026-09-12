@@ -1,11 +1,13 @@
 import numpy as np
 from ..metrics import accuracy
 from ..initializers import random, zeros
-from ..layers import linear_activation_backward, linear_activation_forward
 from ..activations import relu, sigmoid, sigmoid_backward, relu_backward
 from ..losses import binary_cross_entropy, binary_cross_entropy_backward
-from ..regularizers import L2
-
+from ..layers import (
+    linear_activation_backward,
+    linear_activation_forward,
+    Dropout,
+)
 
 class LLayerNN:
 
@@ -14,6 +16,7 @@ class LLayerNN:
         hidden_layer: list[int],
         optimizer,
         regularizer=None,
+        dropout=None,
         epochs: int = 100,
         threshold: float = 0.5,
         verbose=True,
@@ -23,6 +26,7 @@ class LLayerNN:
         self.threshold = threshold
         self.optimizer = optimizer
         self.regularizer = regularizer
+        self.dropout = dropout
 
         self.cost_history = []
         self.is_fitted = False
@@ -39,7 +43,7 @@ class LLayerNN:
             )
             self.parameters["b" + str(l)] = zeros((self.layer_dims[l], 1))
 
-    def _forward(self, X):
+    def _forward(self, X, training=True):
         A = X
         L = int(len(self.parameters) / 2)
         caches = []
@@ -47,10 +51,21 @@ class LLayerNN:
         for l in range(1, L):
             W_l = self.parameters["W" + str(l)]
             b_l = self.parameters["b" + str(l)]
-            A_i, cache = linear_activation_forward(A, W_l, b_l, relu)
+
+            A_i, cache = linear_activation_forward(
+                A, W_l, b_l, relu
+            )
+
+            if self.dropout is not None:
+                A_i, dropout_mask = self.dropout.forward(
+                    A_i,
+                    training=training
+                )
+            else:
+                dropout_mask = None
 
             A = A_i
-            caches.append(cache)
+            caches.append((cache, dropout_mask))
 
         W = self.parameters["W" + str(L)]
         b = self.parameters["b" + str(L)]
@@ -69,9 +84,11 @@ class LLayerNN:
         regularization_loss = self.regularizer.penalty(self.parameters, m)
         return data_loss + regularization_loss
 
+
     def _backward(self, Y, A, caches, m):
         L = int(len(self.parameters) / 2)
 
+        # Output layer: Linear -> Sigmoid
         dAL = binary_cross_entropy_backward(Y, A)
 
         dA_prev, dWL, dbL = linear_activation_backward(
@@ -86,10 +103,17 @@ class LLayerNN:
         self.grads["dW" + str(L)] = dWL
         self.grads["db" + str(L)] = dbL
 
+        # Hidden layers: Linear -> ReLU -> Dropout
         for l in range(L - 1, 0, -1):
+
+            cache, dropout_mask = caches[l - 1]
+
+            if self.dropout is not None:
+                dA_prev = self.dropout.backward(dA_prev, dropout_mask)
+
             dA_prev, dWl, dbl = linear_activation_backward(
                 dA_prev,
-                caches[l - 1],
+                cache,
                 relu_backward,
             )
 
@@ -99,8 +123,10 @@ class LLayerNN:
             self.grads["dW" + str(l)] = dWl
             self.grads["db" + str(l)] = dbl
 
+
     def _update_parameters(self):
         self.optimizer.update(self.parameters, self.grads)
+
 
     def fit(self, X: np.ndarray, Y: np.ndarray, batch_size=None):
 
@@ -150,7 +176,7 @@ class LLayerNN:
                 Y_batch = Y_shuffled[:, start:end]
 
                 # forward
-                prediction, caches = self._forward(X_batch)
+                prediction, caches = self._forward(X_batch, training=True)
 
                 # loss
                 batch_cost = self._compute_loss(Y_batch, prediction, m)
@@ -183,7 +209,7 @@ class LLayerNN:
         if not self.is_fitted:
             raise ValueError("Model has not been fitted.")
 
-        A, _ = self._forward(X)
+        A, _ = self._forward(X, training=False)
 
         return A
 
