@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from mydl.models import LLayerNN
-
+from mydl.optimizers import Momentum
 
 def load_dataset():
     data = load_breast_cancer()
@@ -43,7 +43,7 @@ class TestLLayerNN:
     def test_fit(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            learning_rate=0.01,
+            optimizer = Momentum(learning_rate=0.01),
             epochs=100,
             verbose=False,
         )
@@ -55,7 +55,7 @@ class TestLLayerNN:
     def test_cost_decreases(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            learning_rate=0.01,
+            optimizer = Momentum(learning_rate=0.01),
             epochs=100,
             verbose=False,
         )
@@ -67,7 +67,7 @@ class TestLLayerNN:
     def test_predict_proba_shape(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            learning_rate=0.01,
+            optimizer = Momentum(learning_rate=0.01),
             epochs=100,
             verbose=False,
         )
@@ -81,7 +81,7 @@ class TestLLayerNN:
     def test_probability_range(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            learning_rate=0.01,
+            optimizer = Momentum(learning_rate=0.01),
             epochs=100,
             verbose=False,
         )
@@ -96,7 +96,7 @@ class TestLLayerNN:
     def test_predict_shape(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            learning_rate=0.01,
+            optimizer = Momentum(learning_rate=0.01),
             epochs=100,
             verbose=False,
         )
@@ -110,7 +110,7 @@ class TestLLayerNN:
     def test_score(self):
         model = LLayerNN(
             hidden_layer=[32, 16, 8],
-            learning_rate=0.01,
+            optimizer = Momentum(learning_rate=0.01),
             epochs=1000,
             verbose=False,
         )

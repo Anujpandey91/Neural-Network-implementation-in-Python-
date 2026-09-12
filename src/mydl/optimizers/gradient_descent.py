@@ -1,6 +1,6 @@
 class GradientDescent:
 
-    def __init__(self, learning_rate):
+    def __init__(self, learning_rate: float=0.01):
         self.learning_rate = learning_rate
 
     def update(self, parameters, grads):

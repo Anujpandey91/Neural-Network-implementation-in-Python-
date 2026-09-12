@@ -10,17 +10,15 @@ class LLayerNN:
     def __init__(
         self,
         hidden_layer: list[int],
-        learning_rate: int=0.01,
+        optimizer,
         epochs: int=100,
         threshold: float=0.5,
         verbose = True
     ):
         self.hidden_layer = hidden_layer
-        self.learning_rate = learning_rate
         self.epochs = epochs
         self.threshold = threshold
-        
-        self.optimizer = GradientDescent(self.learning_rate)
+        self.optimizer = optimizer
 
         self.cost_history = []
         self.is_fitted = False
