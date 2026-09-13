@@ -17,13 +17,25 @@ Build and understand neural networks by implementing their core mathematics from
 
 ## Overview
 
-**mydl** is an educational deep learning library implemented from scratch using **NumPy**.
+**mydl** is a small educational deep learning library implemented from scratch using **NumPy**.
 
-The purpose of the project is to make the mathematics and internal mechanics of neural networks explicit rather than hiding them behind high-level deep learning frameworks.
+The project focuses on making the mathematics and internal mechanics of neural networks explicit instead of hiding them behind high-level deep learning frameworks.
 
-The library implements forward propagation, backpropagation, optimization algorithms, regularization, dropout, training history, validation, evaluation metrics, and visualization.
+The library includes:
 
-The project is built as part of studying the **Deep Learning Specialization by Andrew Ng**, with the emphasis on understanding how the algorithms work internally.
+- Logistic Regression
+- Two-Layer Neural Networks
+- L-Layer Neural Networks
+- Forward and backward propagation
+- Mini-batch training
+- Multiple optimization algorithms
+- L1, L2, and combined L1/L2 regularization
+- Dropout
+- Training and validation history
+- Binary classification metrics
+- Training-history visualization
+
+The project was built alongside the **Deep Learning Specialization by Andrew Ng**, with an emphasis on translating the mathematical concepts into working implementations.
 
 ---
 
@@ -42,7 +54,7 @@ The project is built as part of studying the **Deep Learning Specialization by A
 - Binary Cross-Entropy loss
 - Linear layers
 - He initialization
-- Vectorized NumPy operations
+- Vectorized NumPy computation
 - Dropout
 
 ### Optimizers
@@ -61,8 +73,10 @@ The project is built as part of studying the **Deep Learning Specialization by A
 ### Training and Evaluation
 
 - Mini-batch training
-- Training loss and accuracy history
-- Validation loss and accuracy
+- Training loss history
+- Training accuracy history
+- Validation loss
+- Validation accuracy
 - Configurable classification threshold
 - Accuracy
 - Precision
@@ -79,7 +93,12 @@ The project is built as part of studying the **Deep Learning Specialization by A
 
 ---
 
-## Installation
+# Installation
+
+## Requirements
+
+- Python 3.11+
+- NumPy 2.x
 
 Clone the repository:
 
