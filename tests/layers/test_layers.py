@@ -5,6 +5,7 @@ from mydl.layers import (
     linear_backward,
     linear_activation_forward,
     linear_activation_backward,
+    Dropout,
 )
 
 from mydl.activations import (
@@ -170,3 +171,66 @@ class TestLinearActivationBackward:
         assert dA_prev.shape == A_prev.shape
         assert dW.shape == W.shape
         assert db.shape == b.shape
+
+
+class TestDropout:
+
+    def test_inference_returns_input_unchanged(self):
+        np.random.seed(42)
+
+        dropout = Dropout(keep_probability=0.8)
+
+        A = np.array(
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+            ]
+        )
+
+        output, mask = dropout.forward(A, training=False)
+
+        np.testing.assert_array_equal(output, A)
+        assert mask is None
+
+    def test_training_applies_dropout(self):
+        np.random.seed(42)
+
+        dropout = Dropout(keep_probability=0.5)
+
+        A = np.ones((100, 100))
+
+        output, mask = dropout.forward(A, training=True)
+
+        assert mask.shape == A.shape
+        assert np.any(mask == False)
+        assert np.any(mask == True)
+
+    def test_training_uses_inverted_scaling(self):
+        np.random.seed(42)
+
+        dropout = Dropout(keep_probability=0.5)
+
+        A = np.ones((100, 100))
+
+        output, mask = dropout.forward(A, training=True)
+
+        expected = mask / 0.5
+
+        np.testing.assert_allclose(output, expected)
+
+    def test_backward_uses_forward_mask(self):
+        np.random.seed(42)
+
+        dropout = Dropout(keep_probability=0.5)
+
+        A = np.ones((100, 100))
+
+        _, mask = dropout.forward(A, training=True)
+
+        dA = np.ones_like(A)
+
+        dA_prev = dropout.backward(dA, mask)
+
+        expected = mask / 0.5
+
+        np.testing.assert_allclose(dA_prev, expected)

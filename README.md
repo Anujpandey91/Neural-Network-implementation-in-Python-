@@ -17,9 +17,9 @@ Build and understand neural networks by implementing their core mathematics from
 
 ## Overview
 
-**mydl** is a small educational deep learning library implemented from scratch using **NumPy**.
+**mydl** is an educational deep learning library implemented from scratch using **NumPy**.
 
-The project focuses on making the mathematics and internal mechanics of neural networks explicit instead of hiding them behind high-level deep learning frameworks.
+The project focuses on making the mathematics and internal mechanics of neural networks explicit rather than hiding them behind high-level deep learning frameworks.
 
 The library includes:
 
@@ -35,7 +35,7 @@ The library includes:
 - Binary classification metrics
 - Training-history visualization
 
-The project was built alongside the **Deep Learning Specialization by Andrew Ng**, with an emphasis on translating the mathematical concepts into working implementations.
+The project was built alongside the **Deep Learning Specialization by Andrew Ng**, with an emphasis on translating mathematical concepts into working implementations.
 
 ---
 
@@ -93,14 +93,47 @@ The project was built alongside the **Deep Learning Specialization by Andrew Ng*
 
 ---
 
-# Installation
+## Table of Contents
 
-## Requirements
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Data Format](#data-format)
+- [API Usage](#api-usage)
+- [Optimizers](#optimizers)
+- [Regularization](#regularization)
+- [Dropout](#dropout)
+- [Validation](#validation)
+- [Prediction](#prediction)
+- [Evaluation Metrics](#evaluation-metrics)
+- [Visualization](#visualization)
+- [Other Models](#other-models)
+- [Project Structure](#project-structure)
+- [Example Results](#example-results)
+- [Testing](#testing)
+- [Design Philosophy](#design-philosophy)
+- [Learning Context](#learning-context)
+- [Contributing](#contributing)
+- [License](#license)
 
-- Python 3.11+
-- NumPy 2.x
+---
 
-Clone the repository:
+# Quick Start
 
-```bash
-git clone https://github.com/Anujpandey91/Neural-Network-implementation-in-Python-.git
+The main deep learning model is `LLayerNN`.
+
+```python
+from mydl import LLayerNN, Adam
+
+model = LLayerNN(
+    hidden_layer=[32, 16, 8],
+    optimizer=Adam(learning_rate=0.001),
+    epochs=1000,
+)
+
+model.fit(X_train, Y_train)
+
+predictions = model.predict(X_test)
+
+score = model.score(X_test, Y_test)
+
+print(f"Accuracy: {score:.4f}")
